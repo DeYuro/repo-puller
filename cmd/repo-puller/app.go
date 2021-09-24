@@ -2,15 +2,21 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func app() error {
-
 	appCtx, cancel := context.WithCancel(context.Background())
+
+	var daemon bool
+	flag.BoolVar(&daemon, "daemon", false, "daemon mode")
+
+
 	errChan := make(chan error)
 	go func() {
 		handleSIGINT()
@@ -18,7 +24,7 @@ func app() error {
 	}()
 
 	go func() {
-		errChan <- run()
+		errChan <- run(cancel, daemon)
 	}()
 	select {
 	case err := <-errChan:
@@ -31,7 +37,16 @@ func app() error {
 
 
 
-func run() error {
+func run(cancel context.CancelFunc, daemon bool) error {
+
+	if !daemon {
+		//do something
+		println("instance mode")
+		cancel()
+		time.Sleep(5 * time.Second)
+	}
+
+	println("daemon mode")
 	return nil
 }
 
