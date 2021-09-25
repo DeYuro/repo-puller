@@ -3,15 +3,30 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"os"
+	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
 )
 
+type SvcError struct {
+	name string
+}
+
+func (s SvcError) Error() string {
+	return fmt.Sprintf("%s not exist \n", s.name)
+}
+
 func app() error {
+	if !commandExists(`git`) {
+		return SvcError{name: `git`}
+	}
+
 	appCtx, cancel := context.WithCancel(context.Background())
+
 
 	var daemon bool
 	flag.BoolVar(&daemon, "daemon", false, "daemon mode")
@@ -73,4 +88,9 @@ func handleSIGINT() {
 		signal.Stop(sigCh)
 		return
 	}
+}
+
+func commandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
 }
