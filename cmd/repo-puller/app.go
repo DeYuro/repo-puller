@@ -15,7 +15,7 @@ func app() error {
 
 	var daemon bool
 	flag.BoolVar(&daemon, "daemon", false, "daemon mode")
-
+	flag.Parse()
 
 	errChan := make(chan error)
 	go func() {
